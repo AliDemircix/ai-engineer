@@ -6,7 +6,7 @@ MODEL = "llama3"
 SYSTEM_PROMPT = "You are a helpful assistant."
 
 
-def send_request(messages):
+def send_request(messages: list[dict[str, str]]) -> str:
     """
     messages: a list of role/content dicts (the shape from Part 3)
     returns: the model's reply text (str)
@@ -19,7 +19,7 @@ def send_request(messages):
     return data["message"]["content"]
 
 
-def main():
+def main() -> None:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     print("Chatbot ready. Type 'quit' to exit.")
     while True:

@@ -31,17 +31,29 @@ def send_request(messages: list[dict[str, str]], model: str) -> str:
     return data["message"]["content"]
 
 
+def build_messages(config: ChatConfig, history: list[ChatMessage]) -> list[dict[str, str]]:
+    """
+    config: carries system_prompt and max_history
+    history: every ChatMessage so far
+    returns: the dict list Ollama expects
+    """
+    system_message = ChatMessage(role="system", content=config.system_prompt)
+    trimmed_history = history[-config.max_history:]
+    combined = [system_message] + trimmed_history
+    return [{"role": m.role, "content": m.content} for m in combined]
+
+
 def main() -> None:
     config = ChatConfig()
-    history: list[ChatMessage] = [ChatMessage(role="system", content=config.system_prompt)]
+    history: list[ChatMessage] = []
     print("Chatbot ready. Type 'quit' to exit.")
     while True:
         user_input = input("You: ")
         if user_input.lower() == "quit":
             break
         history.append(ChatMessage(role="user", content=user_input))
-        dict_messages = [{"role": m.role, "content": m.content} for m in history]
-        reply = send_request(dict_messages, config.model)
+        messages = build_messages(config, history)
+        reply = send_request(messages, config.model)
         print("Bot:", reply)
         history.append(ChatMessage(role="assistant", content=reply))
 

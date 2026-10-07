@@ -46,8 +46,11 @@ def build_messages(config: ChatConfig, history: list[ChatMessage]) -> list[dict[
     return [{"role": m.role, "content": m.content} for m in combined]
 
 
-async def main() -> None:
-    config = ChatConfig()
+async def main(
+    model: str = "llama3",
+    system_prompt: str = "You are a helpful assistant.",
+) -> None:
+    config = ChatConfig(model=model, system_prompt=system_prompt)
     history: list[ChatMessage] = []
     print("Chatbot ready. Type 'quit' to exit.")
     while True:

@@ -9,3 +9,6 @@ dependencies = [
     "httpx",
     "typer",
 ]
+
+[project.scripts]
+ai-chat = "ai_chat.cli:app"

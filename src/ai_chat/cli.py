@@ -1,4 +1,15 @@
+import asyncio
+import sys
+from pathlib import Path
+
+import httpx
 import typer
+
+if __package__:
+    from .core import main as run_chat_loop
+else:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from ai_chat.core import main as run_chat_loop
 
 app = typer.Typer()
 
@@ -16,8 +27,10 @@ def chat(
         help="System prompt for the conversation.",
     ),
 ) -> None:
-    print(f"Model: {model}")
-    print(f"System prompt: {system_prompt}")
+    try:
+        asyncio.run(run_chat_loop(model, system_prompt))
+    except httpx.ConnectError:
+        print("Can't reach Ollama. Is it running? Try: ollama serve")
 
 
 if __name__ == "__main__":

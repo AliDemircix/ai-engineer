@@ -6,5 +6,5 @@ build-backend = "setuptools.build_meta"
 name = "ai-chat"
 version = "0.1.0"
 dependencies = [
-    "requests",
+    "httpx",
 ]

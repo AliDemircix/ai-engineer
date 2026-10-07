@@ -1,6 +1,7 @@
-# chatbot.py
-import requests
+import asyncio
 from dataclasses import dataclass
+
+import httpx
 
 URL = "http://localhost:11434/api/chat"
 
@@ -18,16 +19,18 @@ class ChatConfig:
     system_prompt: str = "You are a helpful assistant."
 
 
-def send_request(messages: list[dict[str, str]], model: str) -> str:
+async def send_request(messages: list[dict[str, str]], model: str) -> str:
     """
     messages: a list of role/content dicts (the shape from Part 3)
     returns: the model's reply text (str)
     """
-    response = requests.post(
-        URL,
-        json={"model": model, "messages": messages, "stream": False},
-    )
-    data = response.json()
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            URL,
+            json={"model": model, "messages": messages, "stream": False},
+        )
+        response.raise_for_status()
+        data = response.json()
     return data["message"]["content"]
 
 
@@ -43,20 +46,20 @@ def build_messages(config: ChatConfig, history: list[ChatMessage]) -> list[dict[
     return [{"role": m.role, "content": m.content} for m in combined]
 
 
-def main() -> None:
+async def main() -> None:
     config = ChatConfig()
     history: list[ChatMessage] = []
     print("Chatbot ready. Type 'quit' to exit.")
     while True:
-        user_input = input("You: ")
+        user_input = await asyncio.to_thread(input, "You: ")
         if user_input.lower() == "quit":
             break
         history.append(ChatMessage(role="user", content=user_input))
         messages = build_messages(config, history)
-        reply = send_request(messages, config.model)
+        reply = await send_request(messages, config.model)
         print("Bot:", reply)
         history.append(ChatMessage(role="assistant", content=reply))
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
